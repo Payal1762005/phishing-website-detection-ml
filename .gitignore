@@ -1,0 +1,33 @@
+# Python virtual environment
+.venv/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Raw dataset - keep local, download separately
+data/raw/*.csv
+
+# Processed datasets
+data/processed/*
+
+# Temporary files
+*.tmp
+*.log
+
+# Old/unused model
+models/xgboost_phishing_detector.pkl
