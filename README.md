@@ -8,10 +8,7 @@ Phishing websites are designed to imitate legitimate websites and trick users in
 
 The project implements an end-to-end pipeline:
 
-Raw URL
-→ Feature Extraction
-→ XGBoost Classification
-→ Phishing / Legitimate Prediction
+Raw URL → Feature Extraction → XGBoost Classification → Phishing / Legitimate Prediction
 
 ## Problem Statement
 
@@ -19,7 +16,7 @@ Traditional users often rely on visual appearance or website reputation to ident
 
 ## Approach
 
-The project uses URL-based characteristics such as:
+The project uses 16 URL-based characteristics:
 
 - URL length
 - IP address usage
@@ -48,7 +45,7 @@ After preprocessing:
 
 - Original records: 101,219
 - Records with labels: 101,218
-- Unique URLs used: 100,872
+- Unique labeled URLs: 100,872
 - Phishing URLs: 63,492
 - Legitimate URLs: 37,380
 
@@ -82,7 +79,18 @@ Configuration:
 
 ## Results
 
-Using the end-to-end URL feature extraction pipeline:
+The final end-to-end pipeline was evaluated using a stratified 80/20 train-test split after removing the single unlabeled record and duplicate URLs.
+
+### Dataset used for evaluation
+
+- Original records: 101,219
+- Records with labels: 101,218
+- Unique labeled URLs: 100,872
+- Training samples: 80,697
+- Test samples: 20,175
+- URL features: 16
+
+### XGBoost Performance
 
 | Metric | Score |
 |---|---:|
@@ -91,9 +99,7 @@ Using the end-to-end URL feature extraction pipeline:
 | Recall | 99.99% |
 | F1 Score | 99.97% |
 
-Test set size: 20,175 URLs.
-
-Confusion matrix:
+### Confusion Matrix
 
 ```text
                  Predicted
@@ -101,10 +107,3 @@ Confusion matrix:
 
 Phishing        12698        1
 Legitimate         7      7469
-## Author
-
-**Payal Dere**
-
-Computer Science / Information Technology
-
-GitHub: https://github.com/Payal1762005
