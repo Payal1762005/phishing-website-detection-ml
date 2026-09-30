@@ -1,0 +1,2 @@
+evaluation,train_samples,test_samples,unique_train_domains,unique_test_domains,domain_overlap_count,accuracy,precision,recall,f1_score
+domain_grouped,81510,19362,50575,12644,0,0.9993285817580828,0.9989933730391746,0.9999160369437448,0.9994544920481725
