@@ -62,7 +62,8 @@ The following preprocessing steps are applied:
 2. Remove records with missing labels.
 3. Remove duplicate URLs.
 4. Extract URL features from the raw URL.
-5. Perform an 80/20 stratified train-test split.
+5. Perform the initial stratified random 80/20 train-test split.
+6. Perform a separate domain-grouped evaluation using normalized hostnames.
 
 ## Model
 
@@ -79,18 +80,20 @@ Configuration:
 
 ## Results
 
-The final end-to-end pipeline was evaluated using a stratified 80/20 train-test split after removing the single unlabeled record and duplicate URLs.
+The initial evaluation uses a stratified random 80/20 hold-out split. A second
+domain-grouped evaluation was added to assess generalization to previously
+unseen hostnames. Both evaluations remove the single unlabeled record and
+duplicate URLs and use the same deterministic 16 URL features and XGBoost
+configuration.
 
-### Dataset used for evaluation
+### 1. Random stratified 80/20 evaluation
 
 - Original records: 101,219
 - Records with labels: 101,218
 - Unique labeled URLs: 100,872
+- URL features: 16
 - Training samples: 80,697
 - Test samples: 20,175
-- URL features: 16
-
-### XGBoost Performance
 
 | Metric | Score |
 |---|---:|
@@ -99,7 +102,7 @@ The final end-to-end pipeline was evaluated using a stratified 80/20 train-test 
 | Recall | 99.99% |
 | F1 Score | 99.97% |
 
-### Confusion Matrix
+#### Random-split confusion matrix
 
 ```text
                  Predicted
@@ -107,3 +110,52 @@ The final end-to-end pipeline was evaluated using a stratified 80/20 train-test 
 
 Phishing        12698        1
 Legitimate         7      7469
+```
+
+### 2. Domain-grouped evaluation
+
+This evaluation uses normalized hostnames as groups with
+`GroupShuffleSplit(test_size=0.20, random_state=42)`. No hostname appears in
+both partitions.
+
+| Metric | Score |
+|---|---:|
+| Training samples | 81,510 |
+| Test samples | 19,362 |
+| Unique train domains | 50,575 |
+| Unique test domains | 12,644 |
+| Domain overlap | 0 |
+| Accuracy | 99.93285818% |
+| Precision | 99.89933730% |
+| Recall | 99.99160369% |
+| F1 Score | 99.94544920% |
+
+#### Domain-grouped confusion matrix
+
+```text
+[[11909, 1],
+ [12, 7440]]
+```
+
+The existing random-split results remain available for direct comparison. The
+domain-grouped evaluation is more informative for unseen-domain
+generalization, while both results are dataset-specific and should not be
+described as production performance.
+
+## Leakage and Generalization Audit
+
+- Exact raw-URL overlap after preprocessing: **0**
+- Feature-level label leakage identified in the inspected 16 features: **none**
+- Random-split test URLs whose hostname appeared in training:
+  **8,859 / 20,175 = 43.9108%**
+- Random-split test URLs using a training-seen hostname with a new path/query:
+  **8,017 / 20,175 = 39.7373%**
+- Domain-grouped train/test hostname overlap: **0**
+- TLD popularity uses a fixed static set of 20 TLDs and is not label-derived.
+- No timestamp column is available, so temporal validation was not performed.
+
+These checks do not establish that the model is leak-free in an absolute
+sense. The random split allows hostname reuse, which can make evaluation more
+optimistic for unseen-domain deployment. The measured results should therefore
+be interpreted as dataset-specific, with the domain-grouped evaluation
+providing the more informative estimate for previously unseen hostnames.
